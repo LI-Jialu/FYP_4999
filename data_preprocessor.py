@@ -74,4 +74,5 @@ class data_preprocessor:
         scaler = MinMaxScaler(feature_range=(-1, 1))
         y_train = scaler.fit_transform(y_train.reshape(-1,1))[:,0]
         y_test = scaler.transform(y_test.reshape(-1,1))[:,0]
-        return X_train, X_test, y_train, y_test, scaler
+        test_idx = X_train.shape[0]
+        return X_train, X_test, y_train, y_test, scaler, test_idx
