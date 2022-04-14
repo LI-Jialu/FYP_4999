@@ -4,7 +4,6 @@ from keras.layers import LSTM
 from keras.layers import GRU
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import medfilt
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
@@ -21,7 +20,6 @@ seed(1)
 import tensorflow
 tensorflow.random.set_seed(1)
 
-import datetime
 
 n_timestamp = 1800
 n_epochs = 8
@@ -53,7 +51,7 @@ def load_data(date):
 def load_data(dates):
     all_df = []
     for date in dates:
-        chunk = pd.read_csv('../order_book/binance-futures_book_snapshot_5_' + date + '_BTCUSDT.csv.gz',
+        chunk = pd.read_csv('./order_book/binance-futures_book_snapshot_5_' + date + '_BTCUSDT.csv.gz',
                         header = 0,
                         names = ['timestamp', 'Pa1', 'Va1', 'Pb1', 'Vb1', 'Pa2', 'Va2', 'Pb2', 'Vb2', 
                                 'Pa3', 'Va3', 'Pb3', 'Vb3', 'Pa4', 'Va4', 'Pb4', 'Vb4', 
@@ -94,8 +92,8 @@ starttime_0 = datetime.datetime.now()
 
 # data preprocess
 
-start = datetime.datetime.strptime("29-10-2021", "%d-%m-%Y")
-end = datetime.datetime.strptime("29-11-2021", "%d-%m-%Y")
+start = datetime.datetime.strptime("30-10-2021", "%d-%m-%Y")
+end = datetime.datetime.strptime("31-10-2021", "%d-%m-%Y")
 date_temp = [start + datetime.timedelta(days=x) for x in range(0, (end-start).days)]
 date_generated = [d.strftime("%Y-%m-%d") for d in date_temp]
 df = load_data(date_generated)
@@ -134,8 +132,8 @@ y_pred = [round(yx, 2) for yx in y_pred]
 y_tested = y_test.ravel()
 
 # save model and history 
-save_model(model, 'GRU_1800t.model')
-my_dump(history.history, 'history')
+# save_model(model, 'GRU_1800t.model')
+# my_dump(history.history, 'history')
 
 # record the whole running time used in seconds
 endtime_0 = datetime.datetime.now()
@@ -159,7 +157,7 @@ print("r2=" + str(round(r2,2)))
 
 # Get time-series data for back testing
 timestamp_arr = np.array(df[['timestamp']][test_idx + n_timestamp:]).flatten()
-y_predicted_timeseries = pd.DataFrame({'timestamp': timestamp_arr, 'y_predicted': y_predicted_descaled.flatten()})
+y_predicted_timeseries = pd.DataFrame({'timestamp': timestamp_arr, 'y_predicted': y_predicted_descaled.flatten(), 'y_true':y_test_descaled.flatten()})
 my_dump(y_predicted_timeseries, 'y_predicted')
 
 with open('log.txt','a') as f:

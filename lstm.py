@@ -46,8 +46,6 @@ plt.rc('font', **font)
 # Set input number of timestamps and training days
 #
 n_timestamp = 10
-train_days = 1500  # number of days to train from
-testing_days = 500 # number of days to be predicted
 n_epochs = 25
 filter_on = 1
 
