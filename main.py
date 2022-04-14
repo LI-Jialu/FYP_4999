@@ -121,10 +121,6 @@ epochs = range(len(loss))
 
 # record the training time used in seconds
 endtime_1 = datetime.datetime.now()
-with open('time_log.txt','w') as f:
-	f.write('The time to train the GRU model without GPU: '+ str((endtime_1-starttime_1).seconds))
-
-
 
 # to predict the data
 y_predicted = model.predict(X_test)
@@ -137,9 +133,9 @@ y_pred = y_predicted.ravel()
 y_pred = [round(yx, 2) for yx in y_pred]
 y_tested = y_test.ravel()
 
-# dump model and history 
-my_dump(model, 'model')
-my_dump(history, 'history')
+# save model and history 
+save_model(model, 'GRU_1800t.model')
+my_dump(history.history, 'history')
 
 # record the whole running time used in seconds
 endtime_0 = datetime.datetime.now()
@@ -166,4 +162,7 @@ timestamp_arr = np.array(df[['timestamp']][test_idx + n_timestamp:]).flatten()
 y_predicted_timeseries = pd.DataFrame({'timestamp': timestamp_arr, 'y_predicted': y_predicted_descaled.flatten()})
 my_dump(y_predicted_timeseries, 'y_predicted')
 
-print(y_predicted_timeseries)
+with open('log.txt','a') as f:
+    f.write('[' + str(datetime.datetime.now().replace(microsecond=0)) + ']')
+    f.write('\tGRU model, n_timestamp = ' + str(n_timestamp) + ', n_epochs = ' + str(n_epochs))
+    f.write('\tmse = ' + str(round(mse,2)) + ', re_score = ' + str(round(r2,2)))
