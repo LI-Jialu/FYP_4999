@@ -5,8 +5,6 @@ from keras.layers import GRU
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import medfilt
 
-
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
@@ -18,7 +16,6 @@ from numpy import array
 from data_preprocessor import * 
 import numpy as np
 
-
 from numpy.random import seed
 seed(1)
 import tensorflow
@@ -26,7 +23,7 @@ tensorflow.random.set_seed(1)
 
 import datetime
 
-n_timestamp = 50
+n_timestamp = 1800
 n_epochs = 8
 
 # make plot formal
@@ -34,6 +31,7 @@ font = {'family' : 'Arial',
         'weight' : 'normal',
         'size'   : 10}
 plt.rc('font', **font)
+
 '''
 def load_data(date):
     df = pd.read_csv('../order_book/binance-futures_book_snapshot_5_' + date + '_BTCUSDT.csv.gz',
@@ -51,6 +49,7 @@ def load_data(date):
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     return df
 '''
+
 def load_data(dates):
     all_df = []
     for date in dates:
@@ -70,7 +69,6 @@ def load_data(dates):
         all_df.append(df)
     all_df_= pd.concat(all_df)
     return all_df_
-
 
 def build_model(type):
     if(type == 'LSTM'):
@@ -92,7 +90,6 @@ def my_dump(obj, fname):
         print(e)
 
 
-
 starttime_0 = datetime.datetime.now()
 
 # data preprocess
@@ -108,7 +105,7 @@ preprocessor = data_preprocessor(df, n_timestamp)
 f1, f2, f3, f4, f5 = preprocessor.timpoint_feature()
 X = preprocessor.generate_X(f1, f2, f3, f4, f5)
 y = preprocessor.generate_y(f1)
-X_train, X_test, y_train, y_test, sc = preprocessor.train_test_split(X, y)
+X_train, X_test, y_train, y_test, sc, test_idx = preprocessor.train_test_split(X, y)
 
 # build model
 model = build_model('GRU')
@@ -122,10 +119,11 @@ history = model.fit(X_train, y_train.reshape(-1,1), epochs = n_epochs, batch_siz
 loss = history.history['loss']
 epochs = range(len(loss))
 
-# record the tarining time used in seconds
+# record the training time used in seconds
 endtime_1 = datetime.datetime.now()
 with open('time_log.txt','w') as f:
-	f.write('The time to train the LSTM model with GPU: '+ str((endtime_1-starttime_1).seconds))
+	f.write('The time to train the GRU model without GPU: '+ str((endtime_1-starttime_1).seconds))
+
 
 
 # to predict the data
@@ -145,23 +143,27 @@ my_dump(history, 'history')
 
 # record the whole running time used in seconds
 endtime_0 = datetime.datetime.now()
-print((endtime_0 - starttime_0).seconds)
 print('The whole running time:')
+print((endtime_0 - starttime_0).seconds)
 
-
-
-'''
-# set input number of timestamps and training days
-n_timestamp = 10
-train_days = 1500  # number of days to train from
-testing_days = 500 # number of days to be predicted
-n_epochs = 25
-filter_on = 1
-'''
-
-
+plt.figure()
+plt.plot(df['timestamp'][test_idx + n_timestamp : test_idx + n_timestamp + 100], y_predicted_descaled.flatten()[:100], color = 'black', linewidth=0.5, label = 'Predicted value')
+plt.plot(df['timestamp'][test_idx + n_timestamp : test_idx + n_timestamp + 100], y_test_descaled.flatten()[:100], color = 'red', linewidth=0.5, label = 'True value')
+plt.ylabel('Mid-Price')
+plt.xlabel('Timestamp')
+plt.legend()
+plt.title('1800-timestamp Prediction')
+plt.savefig('1800_timestamp')
+plt.close()
 
 mse = mean_squared_error(y_test_descaled, y_predicted_descaled)
 r2 = r2_score(y_test_descaled, y_predicted_descaled)
 print("mse=" + str(round(mse,2)))
 print("r2=" + str(round(r2,2)))
+
+# Get time-series data for back testing
+timestamp_arr = np.array(df[['timestamp']][test_idx + n_timestamp:]).flatten()
+y_predicted_timeseries = pd.DataFrame({'timestamp': timestamp_arr, 'y_predicted': y_predicted_descaled.flatten()})
+my_dump(y_predicted_timeseries, 'y_predicted')
+
+print(y_predicted_timeseries)
