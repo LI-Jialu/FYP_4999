@@ -132,7 +132,7 @@ y_pred = [round(yx, 2) for yx in y_pred]
 y_tested = y_test.ravel()
 
 # save model and history 
-# save_model(model, 'GRU_1800t.model')
+save_model(model, 'GRU_1800t.model')
 # my_dump(history.history, 'history')
 
 # record the whole running time used in seconds
