@@ -9,7 +9,7 @@ import pickle
 
 
 class data_preprocessor: 
-    def __init__(self, df, n_timestamp):
+    def __init__(self, df, n_timestamp = 1):
         self.df = df 
         self.n_timestamp = n_timestamp
         
@@ -62,6 +62,23 @@ class data_preprocessor:
         # Concatenate all features and normalize
         X = np.concatenate((f1, f2, f3, f4, f5), axis = 1)
         X = X[:-(self.n_timestamp)]
+        X = normalize(X)
+        return X
+    
+    def generate_input_X(self, f1, f2, f3, f4, f5): 
+        def normalize(X):
+            m,n = X.shape
+            for j in range(n):
+                features = X[:, j]
+                mean = features.mean(0)
+                std = features.std(0)
+                if(std != 0):
+                    X[:, j] = (features - mean) / std
+                else:
+                    X[:, j] = 0
+            return X
+        # Concatenate all features and normalize
+        X = np.concatenate((f1, f2, f3, f4, f5), axis = 1)
         X = normalize(X)
         return X
 

@@ -4,6 +4,7 @@ from keras.layers import LSTM
 from keras.layers import GRU
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import medfilt
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
@@ -11,6 +12,7 @@ import datetime
 from datetime import datetime as dt
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+from sklearn.externals import joblib
 from numpy import array
 from data_preprocessor import * 
 import numpy as np
@@ -20,6 +22,7 @@ seed(1)
 import tensorflow
 tensorflow.random.set_seed(1)
 
+import datetime
 
 n_timestamp = 1800
 n_epochs = 8
@@ -131,8 +134,9 @@ y_pred = y_predicted.ravel()
 y_pred = [round(yx, 2) for yx in y_pred]
 y_tested = y_test.ravel()
 
-# save model and history 
+# save model, scaler 
 save_model(model, 'GRU_1800t.model')
+joblib.dump(sc, 'scaler.pydata')
 # my_dump(history.history, 'history')
 
 # record the whole running time used in seconds
@@ -164,3 +168,26 @@ with open('log.txt','a') as f:
     f.write('[' + str(datetime.datetime.now().replace(microsecond=0)) + ']')
     f.write('\tGRU model, n_timestamp = ' + str(n_timestamp) + ', n_epochs = ' + str(n_epochs))
     f.write('\tmse = ' + str(round(mse,2)) + ', re_score = ' + str(round(r2,2)))
+    
+###
+# Process To-Be-Predicted Data 
+###
+def input_data_predict(csv_file_path, model, scaler):
+    # read csv
+    df = pd.read_csv(csv_file_path, header = None,
+                    names = ['Pa1', 'Va1', 'Pb1', 'Vb1', 'Pa2', 'Va2', 'Pb2', 'Vb2', 
+                            'Pa3', 'Va3', 'Pb3', 'Vb3', 'Pa4', 'Va4', 'Pb4', 'Vb4', 
+                            'Pa5', 'Va5', 'Pb5', 'Vb5', 'timestamp'],
+                    compression = 'gzip' 
+                    )
+    df['timestamp'] = [str(x)[:-6]+'.'+str(x)[-6:] for x in df['timestamp']]
+    df['timestamp'] = [dt.fromtimestamp(float(x)) for x in df['timestamp']]
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    
+    preprocessor = data_preprocessor(df);
+    f1, f2, f3, f4, f5 = preprocessor.timepoint_feature()
+    X = preprocessor.generate_input_X(f1, f2, f3, f4, f5)
+    y_predicted = model.predict(X)
+    y_predicted = scaler.inverse_transform(y_predicted).flatten()
+    
+    return y_predicted[len(y_predicted)-1]
