@@ -1,9 +1,14 @@
+from keras import Model
 from keras.models import Sequential
 from keras.models import save_model
 from keras.models import load_model
+from keras.layers import Layer
 from keras.layers import Dense
+from keras.layers import Input
 from keras.layers import LSTM
 from keras.layers import GRU
+import keras.backend import K
+from sklearn.preprocessing import MinMaxScaler
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import medfilt
 
@@ -20,14 +25,6 @@ from numpy import array
 from data_preprocessor import * 
 import numpy as np
 import sys
-
-from keras import Model
-from keras.layers import Layer
-import keras.backend as K
-from keras.layers import Input, Dense, SimpleRNN
-from sklearn.preprocessing import MinMaxScaler
-from keras.models import Sequential
-from keras.metrics import mean_squared_error
 
 # Make our plot a bit formal
 font = {'family' : 'Arial',
@@ -88,6 +85,7 @@ def build_model(type, window_size, columns_num):
         nn_model.add(Dense(units = 1))
     return nn_model
 
+
 def create_LSTM_with_attention(hidden_units, dense_units, input_shape, activation):
     x=Input(shape=input_shape)
     LSTM_layer = LSTM(50, return_sequences=True, activation=activation)(x)
@@ -96,6 +94,7 @@ def create_LSTM_with_attention(hidden_units, dense_units, input_shape, activatio
     model=Model(x,outputs)
     model.compile(loss='mse', optimizer='adam')    
     return model
+
 
 def my_dump(obj, fname): 
     try:
@@ -213,8 +212,7 @@ def input_data_predict(csv_file_path, model, scaler):
     
     return y_predicted[len(y_predicted)-1]
 
-def train_with_one_day(date, window_size):
-    n_timestamp = 300
+def train_with_one_day(date, window_size, n_timestamp):
     n_epochs = 5
     df = load_data(date)
     preprocessor = data_preprocessor(df, n_timestamp)
@@ -223,12 +221,12 @@ def train_with_one_day(date, window_size):
     y = preprocessor.generate_y(f1)
     scaler = MinMaxScaler(feature_range=(-1, 1))
     y = scaler.fit_transform(y.reshape(-1,1))[:,0]
-    
+    model = build_model('GRU', window_size, X.shape[1])
+    print(model.summary())
+    '''
     hidden_units = 3
     model = create_LSTM_with_attention(hidden_units=hidden_units, dense_units=1, input_shape=(window_size, X.shape[1]), activation='tanh')
-    
-    # model = build_model('GRU', window_size, X.shape[1])
-    print(model.summary())
+    '''
     model.compile(optimizer = 'adam', loss = 'mean_squared_error')
     # X = np.reshape(X, (X.shape[0],1,X.shape[1]))
     X = X[:-(X.shape[0]%window_size)]
@@ -240,8 +238,19 @@ def train_with_one_day(date, window_size):
     history = model.fit(X, y, epochs = n_epochs, batch_size = 200)
     loss = history.history['loss']
     epochs = range(len(loss))
-    save_model(model, 'GRU_greed_300t.model')
+    save_model(model, 'GRU_fear_300t.model')
     # joblib.dump(scaler, 'scaler.pydata')
+    '''
+    plt.figure()
+    plt.plot(epochs, loss, color = 'black')
+    plt.ylabel('MSE LOSS')
+    plt.xlabel('epoch')
+    plt.title('Traning Curve (GRU_300timestamps)')
+    plt.savefig('training_curve_300_GRU')
+    plt.close()
+    '''
+    
+    
     
     
 if __name__ == '__main__':
@@ -251,7 +260,7 @@ if __name__ == '__main__':
         main()
     elif(sys.argv[1]=='-t'):
         date = sys.argv[2] # 2021-07-30
-        train_with_one_day(date, window_size)
+        train_with_one_day(date, window_size, n_timestamp)
     elif(sys.argv[1]=='-p'):
         model_path = sys.argv[2]
         date = sys.argv[3]
@@ -264,6 +273,7 @@ if __name__ == '__main__':
         y_origin = preprocessor.generate_y(f1)
         scaler = MinMaxScaler(feature_range=(-1, 1))
         scaler.fit(y_origin.reshape(-1,1))
+        y_true = y_origin
         if(X.shape[0]%window_size != 0 ):
             X = X[:-(X.shape[0]%window_size)]
         print(X.shape)
@@ -281,11 +291,61 @@ if __name__ == '__main__':
         plt.ylabel('Mid-Price')
         plt.xlabel('Timestamp')
         plt.legend()
-        plt.title('300-timestamp Prediction (F-F)')
-        plt.savefig('ff_300_GRU')
+        plt.title('GRU 300-timestamp Prediction (F - G)')
+        plt.savefig('300_GRU_0731')
         plt.close()
         mse = mean_squared_error(y_true, y_pred)
         r2 = r2_score(y_true, y_pred)
         # print("mse=" + str(round(mse,2)))
         print("r2=" + str(round(r2,2)))
+        
+    elif(sys.argv[1] == '-ps'):
+        model_path = sys.argv[2]
+        date = sys.argv[3]
+        model = load_model(model_path)
+        df = load_data(date)
+        df = df.iloc[:5000]
+        preprocessor = data_preprocessor(df, n_timestamp)
+        f1, f2, f3, f4, f5 = preprocessor.timpoint_feature()
+        X = preprocessor.generate_X(f1, f2, f3, f4, f5)
+        y_origin = preprocessor.generate_y(f1)
+        if(X.shape[0]%window_size != 0 ):
+            X = X[:-(X.shape[0]%window_size)]
+            y = y_origin[:-(y_origin.shape[0]%window_size)]
+        X_copy = np.array_split(X,X.shape[0]//window_size)
+        y_copy = np.array_split(y,X.shape[0]//window_size)
+        y_return_list = []
+        for i in range(len(X_copy)):
+            X = X_copy[i]
+            y = y_copy[i]
+            scaler = MinMaxScaler(feature_range=(-1, 1))
+            scaler.fit_transform(y.reshape(-1,1))
+            X = np.reshape(X, (1, window_size, X.shape[1]))
+            y_predicted = model.predict(X)
+            y_predicted_descaled = scaler.inverse_transform(y_predicted)
+            y_return = y_predicted_descaled[len(y_predicted_descaled)-1][0]
+            y_return_list.append(y_return)
+        
+        
+        y_coord = np.array(y_return_list).reshape(-1,1)
+        x_coord = np.array([df['timestamp'][i] for i in range(n_timestamp + window_size, len(df['timestamp']), window_size)]).reshape(-1,1)
+        pred_points = np.concatenate((x_coord, y_coord), axis = 1)
+        
+        x_coord = np.array([df['timestamp'][i] for i in range(window_size, len(df['timestamp']), window_size)]).reshape(-1,1)
+        y_coord = np.array([y_origin[i] for i in range(0, y_origin.shape[0], window_size)]).reshape(-1,1)
+        true_points = np.concatenate((x_coord, y_coord), axis = 1)
+        true_points = true_points[:-1]
+        print(pred_points.shape)
+        print(true_points.shape)
+            
+        plt.figure()
+        # y_interval = np.array([y_pred[i] for i in range(0, len(y_pred), 100)])
+        timestamp_interval = np.array([df['timestamp'][i] for i in range(n_timestamp + window_size, len(df['timestamp']), window_size)])
+        plt.plot(df['timestamp'][n_timestamp : ], y_origin, color = 'red', linewidth=0.5, label = 'True value')
+        plt.ylabel('Mid-Price')
+        plt.xlabel('Timestamp')
+        plt.legend()
+        plt.title('300-timestamp Prediction (F-F)')
+        plt.savefig('ff_300_GRU')
+        plt.close()
     
