@@ -92,7 +92,7 @@ def build_model(model_type, window_size, columns_num):
         x=Input(shape=input_shape)
         LSTM_layer = LSTM(50, return_sequences=True, activation='tanh')(x)
         attention_layer = attention()(LSTM_layer)
-        outputs=Dense(1, trainable=True, activation=activation)(attention_layer)
+        outputs=Dense(1, trainable=True, activation='tanh')(attention_layer)
         model=Model(x,outputs)
         model.compile(loss='mse', optimizer='adam')    
     return model
