@@ -7,7 +7,7 @@ from keras.layers import Dense
 from keras.layers import Input
 from keras.layers import LSTM
 from keras.layers import GRU
-import keras.backend import K
+import keras.backend as K
 from sklearn.preprocessing import MinMaxScaler
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import medfilt
