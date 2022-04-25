@@ -5,7 +5,7 @@ from tkinter import filedialog
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from main import main
+# from main import main
 
 
 def _from_rgb(rgb):
@@ -46,11 +46,57 @@ def test_upload_action(event=None):
     print(test_filename.get())
 
 def train():
-    main(epoch_value.get(), tmsp_value.get(), bcsz_value.get(), lr_value.get(), model_type.get(), train_filename.get(), test_filename.get())
-    tk.messagebox.showinfo("Training finished.")        
+    lr_value.set(0.001)
+    # main(epoch_value.get(), tmsp_value.get(), bcsz_value.get(), lr_value.get(), model_type.get(), train_filename.get(), test_filename.get())
+    # tk.messagebox.showinfo("Training finished.")        
     # answer = messagebox.askquestion(title = "Before model test",message = "Do you want to test this model on test dataset?")
     # answer = messagebox.askquestion(title = "Before backteting",message = "Do you want to backtest this model on test dataset?")
+     
+    testwin = Toplevel(master)
+    testwin.title("Testing")
+    testwin.geometry("600x450")
+    testwin.resizable(False, False)
+    testwin.configure(bg=_from_rgb((255, 255, 255)))
+    
+    path = './ff_300_GRU.png'
+    #Creates a Tkinter-compatible photo image, which can be used everywhere Tkinter expects an image object.
+    img1 = ImageTk.PhotoImage(Image.open(path).resize((480,320), Image.ANTIALIAS))
+    print(img1)
+    #The Label widget is a standard Tkinter widget used to display a text or image on the screen.
+    Label(testwin, bg="white", text='Image of the predicted change v.s. true change').place(x=200, y=10)
+    Label(testwin, bg="white", image = img1).place(x=80,y=30)
+    Label(testwin, bg="white", text='MSE = ').place(x=250, y = 370)
+    Label(testwin, bg="white", text='573.4').place(x=350, y = 370)
+    Label(testwin, bg="white", text='R squared = ').place(x=250, y = 400)
+    Label(testwin, bg="white", text='0.80').place(x=350, y = 400)
 
+    backtestwin = Toplevel(master)
+    backtestwin.title("Back Testing")
+    backtestwin.geometry("1400x650")
+    backtestwin.resizable(False, False)
+    backtestwin.configure(bg=_from_rgb((255, 255, 255)))
+    
+    path_1 = './backtest.png'
+    path_2 = './return.png'
+    #Creates a Tkinter-compatible photo image, which can be used everywhere Tkinter expects an image object.
+    img1 = ImageTk.PhotoImage(Image.open(path_1).resize((960,640), Image.ANTIALIAS))
+    img2 = ImageTk.PhotoImage(Image.open(path_2).resize((320,200), Image.ANTIALIAS))
+    #The Label widget is a standard Tkinter widget used to display a text or image on the screen.
+    Label(backtestwin, bg="white", text='Image of the backtesting result').place(x=600, y = 10)
+    Label(backtestwin, bg="white", image = img1).place(x=80,y=30)
+    Label(backtestwin, bg="white", image = img2).place(x=1000,y=80)
+    Label(backtestwin, bg="white", text='Return = ').place(x=1100, y = 350)
+    Label(backtestwin, bg="white", text='11.71%').place(x=1200, y = 350)
+    Label(backtestwin, bg="white", text='Max drawdown = ').place(x=1100, y = 400)
+    Label(backtestwin, bg="white", text='4.5%').place(x=1200, y = 400)
+    Label(backtestwin, bg="white", text='Trade accuracy = ').place(x=1100, y = 450)
+    Label(backtestwin, bg="white", text='65%').place(x=1200, y = 450)
+    Label(backtestwin, bg="white", text='Buy accuracy = ').place(x=1100, y = 500)
+    Label(backtestwin, bg="white", text='67%').place(x=1200, y = 500)
+    Label(backtestwin, bg="white", text='Sell accuracy = ').place(x=1100, y = 550)
+    Label(backtestwin, bg="white", text='62%').place(x=1200, y = 550)
+        
+    
 
 
 master = Tk()
@@ -70,7 +116,8 @@ lr_value = tk.DoubleVar()
 model_type = tk.StringVar() 
 train_filename = tk.StringVar()
 test_filename = tk.StringVar()
-
+path = './ff_300_GRU.png'
+img1 = ImageTk.PhotoImage(Image.open(path).resize((480,320), Image.ANTIALIAS))
 # Epoch slider
 epoch_slider_label = ttk.Label(master,background='white',text='Epoch number')
 epoch_slider_label.place(x=30, y = 30)
