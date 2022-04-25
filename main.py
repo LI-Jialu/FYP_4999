@@ -333,8 +333,3 @@ if __name__ == '__main__':
         plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
-<<<<<<< HEAD
-=======
-
-    
->>>>>>> 6b9ff09c9dc0417e89a60ed309eb620a9a6c7da8
