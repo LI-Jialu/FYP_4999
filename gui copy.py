@@ -5,21 +5,48 @@ from tkinter import filedialog
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+# from main import test
+
 
 def _from_rgb(rgb):
     return "#%02x%02x%02x" % rgb   
 
 def UploadAction(event=None):
     filename = filedialog.askopenfilename()
-    print('Selected:', filename)
+    return filename
 
-def get_current_value():
-    return '{: .2f}'.format(current_value.get())
+# Epoch value 
+def get_epoch_value():
+    return '{: .2f}'.format(epoch_value.get())
+def epoch_slider_changed(event):
+    epoch_value_label.configure(text=get_epoch_value())
+
+# Tmsp value 
+def get_tmsp_value():
+    return '{: .2f}'.format(tmsp_value.get())
+def tmsp_slider_changed(event):
+    tmsp_value_label.configure(text=get_tmsp_value())
+
+# Bcsz value 
+def get_bcsz_value():
+    return '{: .2f}'.format(bcsz_value.get())
+def bcsz_slider_changed(event):
+    bcsz_value_label.configure(text=get_bcsz_value())
+
+# Bcsz value 
+def get_lr_value():
+    return '{: .2f}'.format(lr_value.get())
+def lr_slider_changed(event):
+    lr_value_label.configure(text=get_lr_value())
 
 
-def slider_changed(event):
-    value_label.configure(text=get_current_value())
 
+def train():
+    tk.messagebox.showinfo("Training finished.")
+        
+    answer = messagebox.askquestion(title = "Before model test",message = "Do you want to test this model on test dataset?")
+
+    # answer = messagebox.askquestion(title = "Before backteting",message = "Do you want to backtest this model on test dataset?")
 
 
 
@@ -32,58 +59,65 @@ master.configure(bg=_from_rgb((255, 255, 255)))
 style = ttk.Style(master)
 style.theme_use('classic')
 style.configure('Test.TLabel', background= 'white')
-# slider current value
-current_value = tk.DoubleVar()
+# slider values
+epoch_value = tk.IntVar()
+tmsp_value = tk.IntVar()
+bcsz_value = tk.IntVar()
+lr_value = tk.IntVar()
+model_type = tk.StringVar() 
 
-answer = messagebox.askquestion(title = "Before model test",message = "Do you want to test this model on test dataset?")
-
-answer = messagebox.askquestion(title = "Before backteting",message = "Do you want to backtest this model on test dataset?")
-
-
-# label for the slider
-slider_label = ttk.Label(master, background='white', text='Epoch number')
-slider_label.place(x=30, y = 30)
+# Epoch slider
+epoch_slider_label = ttk.Label(master,background='white',text='Epoch number')
+epoch_slider_label.place(x=30, y = 30)
 #  slider
-slider = ttk.Scale(master,from_=0,to=100,orient='horizontal', command=slider_changed,variable=current_value)
-slider.place(x=150, y=30)
+epoch_slider = ttk.Scale(master,from_=0,to=100,orient='horizontal',command=epoch_slider_changed,variable=epoch_value)
+epoch_slider.place(x=150, y=30)
 # value label
-value_label = ttk.Label(master,background='white',text=get_current_value())
-value_label.place(x=300, y=30)
+epoch_value_label = ttk.Label(master,background='white',text=get_epoch_value())
+epoch_value_label.place(x=300, y=30)
 
-# label for the slider
-slider_label = ttk.Label(master, background='white',text='Timestamp number')
-slider_label.place(x=30, y = 100)
+# Timestamp slider
+tmsp_slider_label = ttk.Label(master, background='white',text='Timestamp number')
+tmsp_slider_label.place(x=30, y = 100)
 #  slider
-slider = ttk.Scale(master,from_=0,to=100,orient='horizontal', command=slider_changed,variable=current_value)
-slider.place(x=150, y=100)
+tmsp_slider = ttk.Scale(master,from_=0,to=100,orient='horizontal', command=tmsp_slider_changed,variable=tmsp_value)
+tmsp_slider.place(x=150, y=100)
 # value label
-value_label = ttk.Label(master,background='white',text=get_current_value())
-value_label.place(x=300, y=100)
+tmsp_value_label = ttk.Label(master,background='white',text=get_tmsp_value())
+tmsp_value_label.place(x=300, y=100)
 
 
-# label for the slider
-slider_label = ttk.Label(master, background='white',text='Batch size')
-slider_label.place(x=30, y = 170)
+# Batch_size slider
+bcsz_slider_label = ttk.Label(master, background='white',text='Batch size')
+bcsz_slider_label.place(x=30, y = 170)
 #  slider
-slider = ttk.Scale(master,from_=0,to=1000,orient='horizontal', command=slider_changed,variable=current_value)
-slider.place(x=150, y=170)
+bcsz_slider = ttk.Scale(master,from_=0,to=1000,orient='horizontal', command=bcsz_slider_changed,variable=bcsz_value)
+bcsz_slider.place(x=150, y=170)
 # value label
-value_label = ttk.Label(master,background='white',text=get_current_value())
-value_label.place(x=300, y=170)
+bcsz_value_label = ttk.Label(master,background='white',text=get_bcsz_value())
+bcsz_value_label.place(x=300, y=170)
 
-# label for the slider
-slider_label = ttk.Label(master, background='white',text='Learning rate')
-slider_label.place(x=30, y = 240)
+# lr slider
+lr_slider_label = ttk.Label(master, background='white',text='Learning rate')
+lr_slider_label.place(x=30, y = 240)
 #  slider
-slider = ttk.Scale(master,from_=0,to=1000,orient='horizontal', command=slider_changed,variable=current_value)
-slider.place(x=150, y=240)
+lr_slider = ttk.Scale(master,from_=0,to=1000,orient='horizontal', command=lr_slider_changed,variable=lr_value)
+lr_slider.place(x=150, y=240)
 # value label
-value_label = ttk.Label(master,background='white',text=get_current_value())
-value_label.place(x=300, y=240)
+lr_value_label = ttk.Label(master,background='white',text=get_lr_value())
+lr_value_label.place(x=300, y=240)
 
 slider_label = ttk.Label(master, background='white',text='Model type')
 slider_label.place(x=30, y =310)
-entry1 = tk.Entry (master).place(x=150, y=310)
+comboExample = ttk.Combobox(master, 
+                            values=["LSTM", 
+                                    "GRU",
+                                    "LSTM & Attention",
+                                    "GRU & Attention"]) 
+comboExample.place(x=150, y =310)
+comboExample.current(0)
+model_type.set(comboExample.get())
+
 
 Label(master, bg="white", text='Upload training file').place(x=30, y = 380)
 tk.Button(master, text='Open', command=UploadAction).place(x=150, y = 380)
@@ -91,7 +125,8 @@ tk.Button(master, text='Open', command=UploadAction).place(x=150, y = 380)
 Label(master, bg="white", text='Upload testing file').place(x=30, y = 450)
 tk.Button(master, text='Open', command=UploadAction).place(x=150, y = 450)
 
-tk.Button(master, text='Start', command=UploadAction).place(x=180, y = 520)
+tk.Button(master, text='Start', command = train()).place(x=180, y = 520)
+
 
 '''
 path = './1800_timestamp.png'

@@ -43,4 +43,5 @@ Label(master, bg="white", text='Image of backtesting').place(x=800, y = 10)
 tk.Label(master, bg="white", image = img2).place(x=800,y=30)'''
 
 
+
 mainloop()
