@@ -5,8 +5,9 @@ from tkinter import filedialog
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-# from main import main
-
+from main import main
+import threading 
+import time 
 
 def _from_rgb(rgb):
     return "#%02x%02x%02x" % rgb   
@@ -46,8 +47,14 @@ def test_upload_action(event=None):
     print(test_filename.get())
 
 def train():
+    epoch_value.set(5)
+    tmsp_value.set(300)
+    bcsz_value.set(200)
     lr_value.set(0.001)
-    # main(epoch_value.get(), tmsp_value.get(), bcsz_value.get(), lr_value.get(), model_type.get(), train_filename.get(), test_filename.get())
+    model_type.set('GRU')
+    train_filename.set('2021-08-21')
+    test_filename.set('2021-08-23')
+    main(epoch_value.get(), tmsp_value.get(), bcsz_value.get(), lr_value.get(), model_type.get(), train_filename.get(), test_filename.get())
     # tk.messagebox.showinfo("Training finished.")        
     # answer = messagebox.askquestion(title = "Before model test",message = "Do you want to test this model on test dataset?")
     # answer = messagebox.askquestion(title = "Before backteting",message = "Do you want to backtest this model on test dataset?")
@@ -60,11 +67,12 @@ def train():
     
     path = './ff_300_GRU.png'
     #Creates a Tkinter-compatible photo image, which can be used everywhere Tkinter expects an image object.
-    img1 = ImageTk.PhotoImage(Image.open(path).resize((480,320), Image.ANTIALIAS))
-    print(img1)
+    global img
+    img = ImageTk.PhotoImage(Image.open(path).resize((480,320), Image.ANTIALIAS))
+    print(img)
     #The Label widget is a standard Tkinter widget used to display a text or image on the screen.
     Label(testwin, bg="white", text='Image of the predicted change v.s. true change').place(x=200, y=10)
-    Label(testwin, bg="white", image = img1).place(x=80,y=30)
+    Label(testwin, bg="white", image = img).place(x=80,y=30)
     Label(testwin, bg="white", text='MSE = ').place(x=250, y = 370)
     Label(testwin, bg="white", text='573.4').place(x=350, y = 370)
     Label(testwin, bg="white", text='R squared = ').place(x=250, y = 400)
@@ -78,6 +86,8 @@ def train():
     
     path_1 = './backtest.png'
     path_2 = './return.png'
+    global img1 
+    global img2
     #Creates a Tkinter-compatible photo image, which can be used everywhere Tkinter expects an image object.
     img1 = ImageTk.PhotoImage(Image.open(path_1).resize((960,640), Image.ANTIALIAS))
     img2 = ImageTk.PhotoImage(Image.open(path_2).resize((320,200), Image.ANTIALIAS))
@@ -178,7 +188,6 @@ Label(master, bg="white", text='Upload testing file').place(x=30, y = 450)
 tk.Button(master, text='Open', command=test_upload_action).place(x=150, y = 450)
 
 tk.Button(master, text='Start', command = train).place(x=180, y = 520)
-
 
 
 mainloop()
