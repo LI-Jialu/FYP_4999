@@ -74,25 +74,23 @@ def load_data(date):
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     return df
 
-def build_model(type, window_size, columns_num):
-    if(type == 'LSTM'):
-        nn_model = Sequential()
-        nn_model.add(LSTM(50, activation='relu', input_shape = (window_size, columns_num)))
-        nn_model.add(Dense(units = 1))
-    if(type == 'GRU'):
-        nn_model = Sequential()
-        nn_model.add(GRU(50, activation='relu', input_shape = (window_size, columns_num)))
-        nn_model.add(Dense(units = 1))
-    return nn_model
-
-
-def create_LSTM_with_attention(hidden_units, dense_units, input_shape, activation):
-    x=Input(shape=input_shape)
-    LSTM_layer = LSTM(50, return_sequences=True, activation=activation)(x)
-    attention_layer = attention()(LSTM_layer)
-    outputs=Dense(1, trainable=True, activation=activation)(attention_layer)
-    model=Model(x,outputs)
-    model.compile(loss='mse', optimizer='adam')    
+def build_model(model_type, window_size, columns_num):
+    if(model_type == 'LSTM'):
+        model = Sequential()
+        model.add(LSTM(50, activation='relu', input_shape = (window_size, columns_num)))
+        model.add(Dense(units = 1))
+    if(model_type == 'GRU'):
+        model = Sequential()
+        model.add(GRU(50, activation='relu', input_shape = (window_size, columns_num)))
+        model.add(Dense(units = 1))
+    if(model_type == 'AT-LSTM'):
+        input_shape = (window_size, columns_num)
+        x=Input(shape=input_shape)
+        LSTM_layer = LSTM(50, return_sequences=True, activation='tanh')(x)
+        attention_layer = attention()(LSTM_layer)
+        outputs=Dense(1, trainable=True, activation=activation)(attention_layer)
+        model=Model(x,outputs)
+        model.compile(loss='mse', optimizer='adam')    
     return model
 
 
@@ -224,8 +222,7 @@ def train_with_one_day(date, window_size, n_timestamp):
     model = build_model('GRU', window_size, X.shape[1])
     print(model.summary())
     '''
-    hidden_units = 3
-    model = create_LSTM_with_attention(hidden_units=hidden_units, dense_units=1, input_shape=(window_size, X.shape[1]), activation='tanh')
+    model = create_LSTM_with_attention(dense_units=1)
     '''
     model.compile(optimizer = 'adam', loss = 'mean_squared_error')
     # X = np.reshape(X, (X.shape[0],1,X.shape[1]))
