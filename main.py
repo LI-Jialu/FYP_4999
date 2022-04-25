@@ -7,7 +7,7 @@ from keras.layers import Dense
 from keras.layers import Input
 from keras.layers import LSTM
 from keras.layers import GRU
-from keras.optimizers import Adam
+from keras.optimizers import adam_v2
 import keras.backend as K
 from sklearn.preprocessing import MinMaxScaler
 from scipy.ndimage import gaussian_filter1d
@@ -92,7 +92,7 @@ def build_model(model_type, window_size, columns_num):
         x=Input(shape=input_shape)
         LSTM_layer = LSTM(50, return_sequences=True, activation='tanh')(x)
         attention_layer = attention()(LSTM_layer)
-        outputs=Dense(1, trainable=True, activation=activation)(attention_layer)
+        outputs=Dense(1, trainable=True, activation='tanh')(attention_layer)
         model=Model(x,outputs)
         model.compile(loss='mse', optimizer='adam')    
     return model
@@ -162,8 +162,8 @@ def train_with_one_day(n_epoch, n_timestamp, batch_size, alpha, model_type, trai
     '''
     model = create_LSTM_with_attention(dense_units=1)
     '''
-    optimizer = Adam(learning_rate = alpha)
-    model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+    optimizer = adam_v2.Adam(learning_rate = alpha)
+    model.compile(optimizer = optimizer, loss = 'mean_squared_error')
     # X = np.reshape(X, (X.shape[0],1,X.shape[1]))
     X = X[:-(X.shape[0]%window_size)]
     X = np.reshape(X, (X.shape[0]//window_size, window_size, X.shape[1]))
@@ -225,7 +225,7 @@ def predict_with_one_day(n_timestamp, test_filename, model_path, window_size = 3
     # print("mse=" + str(round(mse,2)))
     print("r2=" + str(round(r2,2)))
     
-
+'''
 if __name__ == '__main__':
     window_size = 30
     n_timestamp = 300
@@ -310,16 +310,27 @@ if __name__ == '__main__':
         true_points = true_points[:-1]
         print(pred_points.shape)
         print(true_points.shape)
+        pd.DataFrame(pred_points).to_csv('pred.csv')
+        pd.DataFrame(true_points).to_csv('true.csv')
             
         plt.figure()
         # y_interval = np.array([y_pred[i] for i in range(0, len(y_pred), 100)])
         timestamp_interval = np.array([df['timestamp'][i] for i in range(n_timestamp + window_size, len(df['timestamp']), window_size)])
         plt.plot(df['timestamp'][n_timestamp : ], y_origin, color = 'red', linewidth=0.5, label = 'True value')
+        for i in range(len(pred_points)):
+            x_values = [pred_points[i][0], true_points[i][0]]
+            y_values = [pred_points[i][1], true_points[i][1]]
+            plt.plot(x_values, y_values, 'b', linestyle="-")
+
+            if i < len(pred_points):
+                x_values_true = [true_points[i][0], true_points[i+1][0]]
+                y_values_true = [true_points[i][1], true_points[i+1][1]]
+                plt.plot(x_values_true, y_values_true, 'g', linestyle="-")
+            
         plt.ylabel('Mid-Price')
         plt.xlabel('Timestamp')
         plt.legend()
-        plt.title('300-timestamp Prediction (F-F)')
+        plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
-
-    
+'''
