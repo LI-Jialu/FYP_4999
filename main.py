@@ -7,7 +7,7 @@ from keras.layers import Dense
 from keras.layers import Input
 from keras.layers import LSTM
 from keras.layers import GRU
-from keras.optimizers import Adam
+from keras.optimizers import adam_v2
 import keras.backend as K
 from sklearn.preprocessing import MinMaxScaler
 from scipy.ndimage import gaussian_filter1d
@@ -162,8 +162,8 @@ def train_with_one_day(n_epoch, n_timestamp, batch_size, alpha, model_type, trai
     '''
     model = create_LSTM_with_attention(dense_units=1)
     '''
-    optimizer = Adam(learning_rate = alpha)
-    model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+    optimizer = adam_v2.Adam(learning_rate = alpha)
+    model.compile(optimizer = optimizer, loss = 'mean_squared_error')
     # X = np.reshape(X, (X.shape[0],1,X.shape[1]))
     X = X[:-(X.shape[0]%window_size)]
     X = np.reshape(X, (X.shape[0]//window_size, window_size, X.shape[1]))
@@ -225,7 +225,7 @@ def predict_with_one_day(n_timestamp, test_filename, model_path, window_size = 3
     # print("mse=" + str(round(mse,2)))
     print("r2=" + str(round(r2,2)))
     
-
+'''
 if __name__ == '__main__':
     window_size = 30
     n_timestamp = 300
@@ -333,3 +333,4 @@ if __name__ == '__main__':
         plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
+'''
