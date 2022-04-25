@@ -337,15 +337,26 @@ if __name__ == '__main__':
         true_points = true_points[:-1]
         print(pred_points.shape)
         print(true_points.shape)
+        pd.DataFrame(pred_points).to_csv('pred.csv')
+        pd.DataFrame(true_points).to_csv('true.csv')
             
         plt.figure()
         # y_interval = np.array([y_pred[i] for i in range(0, len(y_pred), 100)])
         timestamp_interval = np.array([df['timestamp'][i] for i in range(n_timestamp + window_size, len(df['timestamp']), window_size)])
         plt.plot(df['timestamp'][n_timestamp : ], y_origin, color = 'red', linewidth=0.5, label = 'True value')
+        for i in range(len(pred_points)):
+            x_values = [pred_points[i][0], true_points[i][0]]
+            y_values = [pred_points[i][1], true_points[i][1]]
+            plt.plot(x_values, y_values, 'b', linestyle="-")
+
+            if i < len(pred_points):
+                x_values_true = [true_points[i][0], true_points[i+1][0]]
+                y_values_true = [true_points[i][1], true_points[i+1][1]]
+                plt.plot(x_values_true, y_values_true, 'g', linestyle="-")
+            
         plt.ylabel('Mid-Price')
         plt.xlabel('Timestamp')
         plt.legend()
-        plt.title('300-timestamp Prediction (F-F)')
+        plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
-    
