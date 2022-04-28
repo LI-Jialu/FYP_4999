@@ -9,6 +9,8 @@ from main import main
 import threading 
 import time 
 
+
+
 def _from_rgb(rgb):
     return "#%02x%02x%02x" % rgb   
 

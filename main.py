@@ -228,7 +228,7 @@ def predict_with_one_day(n_timestamp, test_filename, model_path, window_size = 3
     # print("mse=" + str(round(mse,2)))
     print("r2=" + str(round(r2,2)))
     
-'''
+
 if __name__ == '__main__':
     window_size = 30
     n_timestamp = 300
@@ -336,4 +336,3 @@ if __name__ == '__main__':
         plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
-'''
