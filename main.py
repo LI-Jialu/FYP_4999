@@ -107,8 +107,11 @@ def my_dump(obj, fname):
         print(e)
         
 def main(n_epoch, n_timestamp, batch_size, alpha, model_type, train_filename, test_filename):
+    print("----------------------Training started----------------------")
     model_path = train_with_one_day(n_epoch, n_timestamp, batch_size, alpha, model_type, train_filename)
+    print("----------------------Training finished and testing started----------------------")
     predict_with_one_day(n_timestamp, test_filename, model_path)
+    print("----------------------Testing finished----------------------")
     
     # Get time-series data for back testing
     #timestamp_arr = np.array(df[['timestamp']][test_idx + n_timestamp:]).flatten()
@@ -225,7 +228,7 @@ def predict_with_one_day(n_timestamp, test_filename, model_path, window_size = 3
     # print("mse=" + str(round(mse,2)))
     print("r2=" + str(round(r2,2)))
     
-'''
+
 if __name__ == '__main__':
     window_size = 30
     n_timestamp = 300
@@ -333,4 +336,3 @@ if __name__ == '__main__':
         plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
-'''
