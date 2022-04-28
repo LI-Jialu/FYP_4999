@@ -1,1 +1,0 @@
-[2022-04-14 12:08:30]	GRU model, n_timestamp = 1800, n_epochs = 8	mse = 1885.4, re_score = 0.97

@@ -6,8 +6,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from main import main
-import threading 
-import time 
 
 
 
@@ -49,18 +47,11 @@ def test_upload_action(event=None):
     print(test_filename.get())
 
 def train():
-    epoch_value.set(5)
-    tmsp_value.set(300)
-    bcsz_value.set(200)
-    lr_value.set(0.001)
-    model_type.set('GRU')
-    train_filename.set('2021-08-21')
-    test_filename.set('2021-08-23')
     main(epoch_value.get(), tmsp_value.get(), bcsz_value.get(), lr_value.get(), model_type.get(), train_filename.get(), test_filename.get())
     # tk.messagebox.showinfo("Training finished.")        
     # answer = messagebox.askquestion(title = "Before model test",message = "Do you want to test this model on test dataset?")
     # answer = messagebox.askquestion(title = "Before backteting",message = "Do you want to backtest this model on test dataset?")
-     
+    '''  
     testwin = Toplevel(master)
     testwin.title("Testing")
     testwin.geometry("600x450")
@@ -107,7 +98,7 @@ def train():
     Label(backtestwin, bg="white", text='67%').place(x=1200, y = 500)
     Label(backtestwin, bg="white", text='Sell accuracy = ').place(x=1100, y = 550)
     Label(backtestwin, bg="white", text='62%').place(x=1200, y = 550)
-        
+    '''
     
 
 
@@ -128,8 +119,7 @@ lr_value = tk.DoubleVar()
 model_type = tk.StringVar() 
 train_filename = tk.StringVar()
 test_filename = tk.StringVar()
-path = './ff_300_GRU.png'
-img1 = ImageTk.PhotoImage(Image.open(path).resize((480,320), Image.ANTIALIAS))
+
 # Epoch slider
 epoch_slider_label = ttk.Label(master,background='white',text='Epoch number')
 epoch_slider_label.place(x=30, y = 30)

@@ -10,51 +10,47 @@ from keras.layers import GRU
 from keras.optimizers import adam_v2
 import keras.backend as K
 from sklearn.preprocessing import MinMaxScaler
-from scipy.ndimage import gaussian_filter1d
-from scipy.signal import medfilt
-
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
-import datetime
 from datetime import datetime as dt
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
-import joblib
-from numpy import array
 from data_preprocessor import * 
 import numpy as np
-import sys
+
+
+from numpy.random import seed
+seed(1)
+import tensorflow
+tensorflow.random.set_seed(1)
 
 # Make our plot a bit formal
-font = {'family' : 'Arial',
-        'weight' : 'normal',
-        'size'   : 10}
+font = {'family' : 'Arial','weight' : 'normal','size' : 10}
 plt.rc('font', **font)
 
-# Add attention layer to the deep learning network
+# construct an attention layer
+# this part of code is inspired from the reference 
 class attention(Layer):
     def __init__(self,**kwargs):
         super(attention,self).__init__(**kwargs)
 
     def build(self,input_shape):
-        self.W=self.add_weight(name='attention_weight', shape=(input_shape[-1],1), 
-                               initializer='random_normal', trainable=True)
-        self.b=self.add_weight(name='attention_bias', shape=(input_shape[1],1), 
-                               initializer='zeros', trainable=True)        
+        self.W=self.add_weight(name='attention_weight', shape=(input_shape[-1],1), initializer='random_normal', trainable=True)
+        self.b=self.add_weight(name='attention_bias', shape=(input_shape[1],1), initializer='zeros', trainable=True)        
         super(attention, self).build(input_shape)
 
     def call(self,x):
-        # Alignment scores. Pass them through tanh function
+        # compute alignment score
         e = K.tanh(K.dot(x,self.W)+self.b)
-        # Remove dimension of size 1
+        # remove dimension
         e = K.squeeze(e, axis=-1)   
-        # Compute the weights
+        # using softmax to compute the weight 
         alpha = K.softmax(e)
-        # Reshape to tensorFlow format
+        # reshape
         alpha = K.expand_dims(alpha, axis=-1)
-        # Compute the context vector
+        # compute the context vector
         context = x * alpha
         context = K.sum(context, axis=1)
         return context
@@ -228,7 +224,7 @@ def predict_with_one_day(n_timestamp, test_filename, model_path, window_size = 3
     # print("mse=" + str(round(mse,2)))
     print("r2=" + str(round(r2,2)))
     
-
+'''
 if __name__ == '__main__':
     window_size = 30
     n_timestamp = 300
@@ -336,3 +332,4 @@ if __name__ == '__main__':
         plt.title('3000-timestamp Prediction (F-F)')
         plt.savefig('ff_300_GRU')
         plt.close()
+'''
